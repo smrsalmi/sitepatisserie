@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dar Al Halwa — Pâtisserie Marocaine · Marrakech</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --velvet: #8B1A2B;
+    --velvet-deep: #5C0F1B;
+    --velvet-light: #B8253A;
+    --gold: #C9942A;
+    --gold-bright: #E8BA4C;
+    --gold-pale: #F5E6B8;
+    --gold-dim: #A07820;
+    --cream: #FAF6EE;
+    --charcoal: #1A1008;
+    --warm-white: #FFF9F0;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--charcoal);
+    color: var(--cream);
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ─── CUSTOM CURSOR ─────────────────────────────────── */
+  .cursor {
+    width: 14px; height: 14px;
+    border: 1.5px solid var(--gold);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: width .25s, height .25s, background .25s;
+  }
+  .cursor-dot {
+    width: 4px; height: 4px;
+    background: var(--gold-bright);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+  }
+  body:hover .cursor { opacity: 1; }
+
+  /* ─── LOADER ────────────────────────────────────────── */
+  #loader {
+    position: fixed; inset: 0;
+    background: var(--velvet-deep);
+    z-index: 9000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1.5rem;
+    transition: opacity .8s ease, visibility .8s ease;
+  }
+  #loader.hide { opacity: 0; visibility: hidden; }
+  .loader-star {
+    font-size: 2.5rem;
+    animation: loaderSpin 2s linear infinite;
+    color: var(--gold);
+  }
+  @keyframes loaderSpin { to { transform: rotate(360deg); } }
+  .loader-text {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    letter-spacing: 5px;
+    color: var(--gold-pale);
+    opacity: 0;
+    animation: fadeInText 1s ease .4s forwards;
+  }
+  @keyframes fadeInText { to { opacity: 1; } }
+
+  /* ─── NAV ───────────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.2rem 3rem;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: background .4s, padding .4s;
+  }
+  nav.scrolled {
+    background: rgba(28, 8, 12, 0.96);
+    backdrop-filter: blur(10px);
+    padding: .8rem 3rem;
+    border-bottom: .5px solid rgba(201,148,42,.25);
+  }
+  .nav-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    letter-spacing: 3px;
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-size: .75rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--gold-pale);
+    text-decoration: none;
+    position: relative;
+    font-weight: 300;
+    transition: color .3s;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute; bottom: -4px; left: 0; right: 0;
+    height: .5px; background: var(--gold);
+    transform: scaleX(0); transform-origin: center;
+    transition: transform .3s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-links a:hover::after { transform: scaleX(1); }
+
+  /* ─── HERO ──────────────────────────────────────────── */
+  #hero {
+    height: 100vh; min-height: 700px;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Geometric zellige background pattern */
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: var(--velvet-deep);
+  }
+  .hero-bg::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(201,148,42,.07) 0px, rgba(201,148,42,.07) 1px, transparent 1px, transparent 40px),
+      repeating-linear-gradient(-45deg, rgba(201,148,42,.07) 0px, rgba(201,148,42,.07) 1px, transparent 1px, transparent 40px);
+  }
+  .hero-bg::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 80% at 50% 40%, rgba(139,26,43,0.55) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 80% 80%, rgba(201,148,42,0.08) 0%, transparent 60%);
+  }
+
+  /* Floating particles */
+  .particles { position: absolute; inset: 0; overflow: hidden; }
+  .particle {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: var(--gold);
+    border-radius: 50%;
+    opacity: 0;
+    animation: float var(--dur) linear var(--delay) infinite;
+  }
+  @keyframes float {
+    0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+    10% { opacity: .6; }
+    90% { opacity: .3; }
+    100% { transform: translateY(-10vh) translateX(var(--drift)); opacity: 0; }
+  }
+
+  .hero-content {
+    position: relative; z-index: 2;
+    text-align: center;
+    padding: 0 2rem;
+  }
+  .hero-overline {
+    font-family: 'Cinzel', serif;
+    font-size: .65rem;
+    letter-spacing: 6px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: revealUp .9s ease .8s forwards;
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3.5rem, 9vw, 7rem);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--warm-white);
+    margin-bottom: .5rem;
+    opacity: 0;
+    animation: revealUp 1s ease 1s forwards;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold-bright);
+    display: block;
+  }
+  .hero-arabic {
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: rgba(245,230,184,.5);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: revealUp .9s ease 1.2s forwards;
+  }
+  .hero-divider {
+    display: flex; align-items: center; justify-content: center; gap: 1rem;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: revealUp .9s ease 1.4s forwards;
+  }
+  .hero-divider span { color: var(--gold); font-size: .8rem; }
+  .hero-divider-line { width: 80px; height: .5px; background: linear-gradient(90deg, transparent, var(--gold)); }
+  .hero-divider-line:last-child { background: linear-gradient(90deg, var(--gold), transparent); }
+  .hero-sub {
+    font-size: .85rem;
+    letter-spacing: 2px;
+    color: rgba(245,230,184,.7);
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+    font-weight: 300;
+    opacity: 0;
+    animation: revealUp .9s ease 1.5s forwards;
+  }
+  .hero-cta {
+    display: inline-flex; align-items: center; gap: .75rem;
+    padding: .9rem 2.5rem;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: .7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: revealUp .9s ease 1.7s forwards;
+    transition: color .4s;
+  }
+  .hero-cta::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--gold);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform .4s;
+    z-index: -1;
+  }
+  .hero-cta:hover { color: var(--charcoal); }
+  .hero-cta:hover::before { transform: scaleX(1); }
+
+  /* Scroll indicator */
+  .scroll-indicator {
+    position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: .5rem;
+    opacity: 0; animation: revealUp .9s ease 2.2s forwards;
+  }
+  .scroll-indicator span { font-size: .6rem; letter-spacing: 3px; color: var(--gold-pale); opacity: .6; text-transform: uppercase; }
+  .scroll-line {
+    width: .5px; height: 50px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: scrollPulse 2s ease infinite;
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: .3; transform: scaleY(.5); transform-origin: top; }
+    50% { opacity: 1; transform: scaleY(1); }
+  }
+
+  @keyframes revealUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── SECTION BASE ──────────────────────────────────── */
+  section { padding: 7rem 3rem; }
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: .6rem;
+    letter-spacing: 5px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 4vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1.2;
+    color: var(--warm-white);
+    margin-bottom: 1.25rem;
+  }
+  .section-title em { font-style: italic; color: var(--gold-bright); }
+  .gold-rule {
+    width: 60px; height: 1px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    margin-bottom: 3rem;
+  }
+
+  /* ─── ABOUT ─────────────────────────────────────────── */
+  #about {
+    background: #110508;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  #about-section { background: #110508; }
+  .about-img-wrap {
+    position: relative;
+  }
+  .about-img-frame {
+    width: 100%; padding-top: 120%;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(201,148,42,.2);
+  }
+  .about-img-inner {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(135deg, rgba(139,26,43,.7) 0%, rgba(92,15,27,.4) 60%, transparent 100%),
+      url('https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=600&q=80') center/cover;
+    transition: transform .8s ease;
+  }
+  .about-img-frame:hover .about-img-inner { transform: scale(1.04); }
+  .about-img-accent {
+    position: absolute; bottom: -20px; right: -20px;
+    width: 100px; height: 100px;
+    border: 1px solid var(--gold);
+    opacity: .3;
+  }
+  .about-img-accent2 {
+    position: absolute; top: -15px; left: -15px;
+    width: 70px; height: 70px;
+    border: .5px solid var(--gold);
+    opacity: .2;
+  }
+  .about-text p {
+    font-size: 1rem;
+    line-height: 1.9;
+    color: rgba(250,246,238,.7);
+    margin-bottom: 1.5rem;
+    font-weight: 300;
+  }
+  .about-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; margin-top: 3rem;
+    border-top: .5px solid rgba(201,148,42,.2);
+    padding-top: 2.5rem;
+  }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.8rem;
+    font-weight: 300;
+    color: var(--gold-bright);
+    display: block;
+  }
+  .stat-lbl {
+    font-size: .65rem;
+    letter-spacing: 2px;
+    color: rgba(245,230,184,.5);
+    text-transform: uppercase;
+  }
+
+  /* ─── GALLERY / SPECIALTIES ─────────────────────────── */
+  #specialties-section { background: var(--charcoal); }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto;
+    gap: 1px;
+    max-width: 1200px; margin: 0 auto;
+  }
+  .gallery-item {
+    position: relative; overflow: hidden;
+    aspect-ratio: 3/4;
+    cursor: pointer;
+  }
+  .gallery-item:nth-child(1) { aspect-ratio: 1; grid-row: span 1; }
+  .gallery-item:nth-child(2) { aspect-ratio: 3/5; grid-row: span 2; }
+  .gallery-item:nth-child(3) { aspect-ratio: 1; }
+  .gallery-item:nth-child(4) { aspect-ratio: 5/3; grid-column: span 2; }
+  .gallery-bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    transition: transform .7s ease;
+    filter: saturate(.8) brightness(.85);
+  }
+  .gallery-item:hover .gallery-bg { transform: scale(1.06); filter: saturate(1) brightness(.9); }
+  .gallery-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(92,15,27,.9) 0%, rgba(92,15,27,.2) 50%, transparent 100%);
+    opacity: 0; transition: opacity .4s;
+    display: flex; align-items: flex-end; padding: 1.5rem;
+  }
+  .gallery-item:hover .gallery-overlay { opacity: 1; }
+  .gallery-info h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--warm-white);
+    margin-bottom: .25rem;
+  }
+  .gallery-info p { font-size: .75rem; color: var(--gold-pale); letter-spacing: 1px; }
+  .gallery-gold-tag {
+    position: absolute; top: 1rem; right: 1rem;
+    background: rgba(201,148,42,.15);
+    border: .5px solid rgba(201,148,42,.5);
+    padding: .3rem .8rem;
+    font-family: 'Cinzel', serif;
+    font-size: .55rem;
+    letter-spacing: 2px;
+    color: var(--gold-bright);
+    text-transform: uppercase;
+    backdrop-filter: blur(4px);
+  }
+
+  /* Item backgrounds */
+  .g1 { background-image: url('https://images.unsplash.com/photo-1559181567-c3190b4d11b5?w=600&q=80'); }
+  .g2 { background-image: url('https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&q=80'); }
+  .g3 { background-image: url('https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80'); }
+  .g4 { background-image: url('https://images.unsplash.com/photo-1587314168485-3236d6710814?w=600&q=80'); }
+  .g5 { background-image: url('https://images.unsplash.com/photo-1562440499-64c9a111f713?w=600&q=80'); }
+
+  /* ─── MENU SECTION ──────────────────────────────────── */
+  #menu-section {
+    background: linear-gradient(180deg, #0E0306 0%, #1A0408 100%);
+    padding: 7rem 3rem;
+  }
+  .menu-header { text-align: center; margin-bottom: 5rem; }
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1px;
+    max-width: 1200px; margin: 0 auto;
+    border: .5px solid rgba(201,148,42,.15);
+  }
+  .menu-card {
+    padding: 2.5rem;
+    background: rgba(255,249,240,.02);
+    border: .5px solid rgba(201,148,42,.1);
+    position: relative;
+    overflow: hidden;
+    transition: background .3s;
+  }
+  .menu-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    transform: scaleX(0); transition: transform .5s;
+  }
+  .menu-card:hover { background: rgba(201,148,42,.04); }
+  .menu-card:hover::before { transform: scaleX(1); }
+  .menu-icon { font-size: 2rem; margin-bottom: 1rem; display: block; }
+  .menu-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--warm-white);
+    margin-bottom: .5rem;
+  }
+  .menu-arabic { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--gold-dim); font-size: .9rem; margin-bottom: .75rem; }
+  .menu-desc { font-size: .8rem; color: rgba(245,230,184,.55); line-height: 1.7; font-weight: 300; }
+  .menu-price {
+    margin-top: 1.25rem;
+    font-family: 'Cinzel', serif;
+    font-size: .75rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+  }
+  .menu-badge {
+    position: absolute; top: 1rem; right: 1rem;
+    font-size: .5rem; letter-spacing: 2px; text-transform: uppercase;
+    padding: .25rem .6rem;
+    border: .5px solid rgba(201,148,42,.4);
+    color: var(--gold-bright);
+    font-family: 'Cinzel', serif;
+  }
+
+  /* ─── EXPERIENCE STRIP ──────────────────────────────── */
+  .strip {
+    padding: 4rem 3rem;
+    background: var(--velvet-deep);
+    border-top: .5px solid rgba(201,148,42,.2);
+    border-bottom: .5px solid rgba(201,148,42,.2);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .strip::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23C9942A' stroke-width='0.3' opacity='0.2'%3E%3Cpath d='M40 4 L44 20 L60 20 L47 30 L51 46 L40 36 L29 46 L33 30 L20 20 L36 20Z'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 80px 80px;
+  }
+  .strip-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--gold-pale);
+    max-width: 700px;
+    margin: 0 auto 1rem;
+    position: relative; z-index: 1;
+    line-height: 1.4;
+  }
+  .strip-author { font-size: .65rem; letter-spacing: 3px; color: var(--gold-dim); text-transform: uppercase; position: relative; z-index: 1; }
+
+  /* ─── CONTACT / VISIT ───────────────────────────────── */
+  #contact-section {
+    background: #0A0205;
+    padding: 7rem 3rem;
+  }
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    align-items: start;
+  }
+  .contact-info-item {
+    display: flex; gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: .5px solid rgba(201,148,42,.12);
+  }
+  .contact-info-item:last-child { border-bottom: none; }
+  .contact-icon {
+    width: 42px; height: 42px;
+    border: .5px solid rgba(201,148,42,.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    color: var(--gold);
+  }
+  .contact-detail { display: flex; flex-direction: column; gap: .3rem; }
+  .contact-label { font-family: 'Cinzel', serif; font-size: .6rem; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; }
+  .contact-value { font-size: .9rem; color: rgba(250,246,238,.8); font-weight: 300; }
+
+  /* Map-like placeholder */
+  .map-placeholder {
+    background: rgba(139,26,43,.08);
+    border: .5px solid rgba(201,148,42,.2);
+    height: 380px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .map-placeholder::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(201,148,42,.04) 0px, rgba(201,148,42,.04) 1px, transparent 1px, transparent 40px),
+      repeating-linear-gradient(90deg, rgba(201,148,42,.04) 0px, rgba(201,148,42,.04) 1px, transparent 1px, transparent 40px);
+  }
+  .map-pin { font-size: 2.5rem; animation: pinBounce 2s ease infinite; }
+  @keyframes pinBounce {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+  }
+  .map-address {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--gold-pale);
+    text-align: center;
+    position: relative; z-index: 1;
+  }
+  .map-marrakech {
+    font-size: .65rem;
+    letter-spacing: 4px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    position: relative; z-index: 1;
+  }
+
+  /* ─── FOOTER ────────────────────────────────────────── */
+  footer {
+    background: var(--velvet-deep);
+    padding: 3rem;
+    text-align: center;
+    border-top: .5px solid rgba(201,148,42,.2);
+  }
+  .footer-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+    letter-spacing: 4px;
+    display: block;
+    margin-bottom: .75rem;
+  }
+  .footer-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: rgba(245,230,184,.45);
+    margin-bottom: 2rem;
+  }
+  .footer-links { display: flex; gap: 2rem; justify-content: center; margin-bottom: 2rem; }
+  .footer-links a { font-size: .65rem; letter-spacing: 2px; color: rgba(245,230,184,.4); text-transform: uppercase; text-decoration: none; transition: color .3s; }
+  .footer-links a:hover { color: var(--gold); }
+  .footer-copy { font-size: .65rem; color: rgba(245,230,184,.2); letter-spacing: 1px; }
+  .footer-ornament { font-size: 1.2rem; color: var(--gold-dim); margin-bottom: .5rem; display: block; }
+
+  /* ─── REVEAL ANIMATIONS ─────────────────────────────── */
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity .8s ease, transform .8s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: .15s; }
+  .reveal-delay-2 { transition-delay: .3s; }
+  .reveal-delay-3 { transition-delay: .45s; }
+
+  /* ─── MARQUEE ───────────────────────────────────────── */
+  .marquee-wrap {
+    overflow: hidden;
+    background: rgba(201,148,42,.06);
+    border-top: .5px solid rgba(201,148,42,.15);
+    border-bottom: .5px solid rgba(201,148,42,.15);
+    padding: .8rem 0;
+  }
+  .marquee-track {
+    display: flex; gap: 3rem;
+    animation: marqueeScroll 22s linear infinite;
+    white-space: nowrap;
+  }
+  .marquee-item {
+    font-family: 'Cinzel', serif;
+    font-size: .6rem;
+    letter-spacing: 3px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .marquee-item span { color: var(--gold); margin: 0 1rem; }
+  @keyframes marqueeScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* ─── RESPONSIVE ────────────────────────────────────── */
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; }
+    nav.scrolled { padding: .8rem 1.5rem; }
+    .nav-links { display: none; }
+    section { padding: 5rem 1.5rem; }
+    #about { grid-template-columns: 1fr; gap: 3rem; }
+    .contact-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .gallery-grid { grid-template-columns: 1fr 1fr; }
+    .gallery-item:nth-child(4) { grid-column: span 2; }
+  }
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursor-dot"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-star">✦</div>
+  <div class="loader-text">DAR AL HALWA</div>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">DAR AL HALWA</a>
+  <ul class="nav-links">
+    <li><a href="#about-section">Histoire</a></li>
+    <li><a href="#specialties-section">Galerie</a></li>
+    <li><a href="#menu-section">Menu</a></li>
+    <li><a href="#contact-section">Visiter</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="particles" id="particles"></div>
+  <div class="hero-content">
+    <p class="hero-overline">✦ Marrakech · Médina · Depuis 1987 ✦</p>
+    <h1 class="hero-title">
+      Dar Al<br><em>Halwa</em>
+    </h1>
+    <p class="hero-arabic">دار الحلوى</p>
+    <div class="hero-divider">
+      <div class="hero-divider-line"></div>
+      <span>✦</span>
+      <div class="hero-divider-line"></div>
+    </div>
+    <p class="hero-sub">Pâtisserie Marocaine d'Exception</p>
+    <a href="#specialties-section" class="hero-cta">Découvrir nos créations</a>
+  </div>
+  <div class="scroll-indicator">
+    <span>Défiler</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item">Chebakia<span>✦</span></span>
+    <span class="marquee-item">Cornes de Gazelle<span>✦</span></span>
+    <span class="marquee-item">Briouates<span>✦</span></span>
+    <span class="marquee-item">Ghriba<span>✦</span></span>
+    <span class="marquee-item">Makrout<span>✦</span></span>
+    <span class="marquee-item">Fekkas<span>✦</span></span>
+    <span class="marquee-item">Sellou<span>✦</span></span>
+    <span class="marquee-item">Mhancha<span>✦</span></span>
+    <span class="marquee-item">Chebakia<span>✦</span></span>
+    <span class="marquee-item">Cornes de Gazelle<span>✦</span></span>
+    <span class="marquee-item">Briouates<span>✦</span></span>
+    <span class="marquee-item">Ghriba<span>✦</span></span>
+    <span class="marquee-item">Makrout<span>✦</span></span>
+    <span class="marquee-item">Fekkas<span>✦</span></span>
+    <span class="marquee-item">Sellou<span>✦</span></span>
+    <span class="marquee-item">Mhancha<span>✦</span></span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about-section" style="padding: 0;">
+  <div id="about" style="padding: 7rem 3rem; max-width: 100%;">
+    <div class="about-img-wrap reveal">
+      <div class="about-img-frame">
+        <div class="about-img-inner"></div>
+      </div>
+      <div class="about-img-accent"></div>
+      <div class="about-img-accent2"></div>
+    </div>
+    <div class="about-text">
+      <span class="section-label reveal">✦ Notre histoire</span>
+      <h2 class="section-title reveal reveal-delay-1">L'art de la douceur<br><em>depuis trois générations</em></h2>
+      <div class="gold-rule reveal reveal-delay-2"></div>
+      <p class="reveal reveal-delay-2">Fondée en 1987 dans le cœur battant de la médina de Marrakech, Dar Al Halwa est née du savoir-faire d'une grand-mère passionnée. Ses recettes, transmises de mère en fille, constituent aujourd'hui l'âme de notre maison.</p>
+      <p class="reveal reveal-delay-3">Chaque pièce est façonnée à la main, selon les traditions ancestrales du Maroc profond — miel du Moyen Atlas, amandes de Tafraout, fleur d'oranger de Meknès. Un voyage sensoriel unique au cœur de Marrakech.</p>
+      <div class="about-stats reveal reveal-delay-3">
+        <div>
+          <span class="stat-num">37</span>
+          <span class="stat-lbl">Années d'excellence</span>
+        </div>
+        <div>
+          <span class="stat-num">60+</span>
+          <span class="stat-lbl">Recettes uniques</span>
+        </div>
+        <div>
+          <span class="stat-num">3</span>
+          <span class="stat-lbl">Générations</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SPECIALTIES / GALLERY -->
+<section id="specialties-section" style="padding: 7rem 0 0;">
+  <div style="padding: 0 3rem 4rem;" class="reveal">
+    <span class="section-label">✦ Nos créations</span>
+    <h2 class="section-title">L'atelier en <em>images</em></h2>
+    <div class="gold-rule"></div>
+  </div>
+  <div class="gallery-grid">
+    <div class="gallery-item reveal">
+      <div class="gallery-bg g1"></div>
+      <div class="gallery-gold-tag">Signature</div>
+      <div class="gallery-overlay">
+        <div class="gallery-info"><h3>Chebakia dorée</h3><p>Fleur de sésame · Miel · Fleur d'oranger</p></div>
+      </div>
+    </div>
+    <div class="gallery-item reveal reveal-delay-1">
+      <div class="gallery-bg g2"></div>
+      <div class="gallery-gold-tag">Bestseller</div>
+      <div class="gallery-overlay">
+        <div class="gallery-info"><h3>Assortiment de fêtes</h3><p>Plateau prestige · Sur commande</p></div>
+      </div>
+    </div>
+    <div class="gallery-item reveal reveal-delay-2">
+      <div class="gallery-bg g3"></div>
+      <div class="gallery-gold-tag">Nouveauté</div>
+      <div class="gallery-overlay">
+        <div class="gallery-info"><h3>Gâteau de mariage</h3><p>Création sur mesure</p></div>
+      </div>
+    </div>
+    <div class="gallery-item reveal reveal-delay-1">
+      <div class="gallery-bg g4"></div>
+      <div class="gallery-overlay">
+        <div class="gallery-info"><h3>Cornes de gazelle</h3><p>Amandes de Tafraout · Pâte fine</p></div>
+      </div>
+    </div>
+    <div class="gallery-item reveal reveal-delay-2" style="aspect-ratio: 1;">
+      <div class="gallery-bg g5"></div>
+      <div class="gallery-gold-tag">Prestige</div>
+      <div class="gallery-overlay">
+        <div class="gallery-info"><h3>Mhancha royale</h3><p>Serpentin d'amandes · Or comestible</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE STRIP -->
+<div class="strip">
+  <p class="strip-quote">"La pâtisserie marocaine, c'est l'amour que l'on met dans chaque pétale de pâte, chaque goutte de miel."</p>
+  <span class="strip-author">— Lalla Fatima, fondatrice de Dar Al Halwa</span>
+</div>
+
+<!-- MENU -->
+<section id="menu-section">
+  <div class="menu-header">
+    <span class="section-label reveal">✦ Notre sélection</span>
+    <h2 class="section-title reveal reveal-delay-1">Les <em>trésors</em> de la maison</h2>
+    <div class="gold-rule reveal reveal-delay-2" style="margin: 0 auto 3rem;"></div>
+  </div>
+  <div class="menu-grid">
+    <div class="menu-card reveal">
+      <span class="menu-badge">Incontournable</span>
+      <span class="menu-icon">🌸</span>
+      <div class="menu-name">Chebakia</div>
+      <div class="menu-arabic">الشباكية</div>
+      <p class="menu-desc">Fleurs de sésame tressées à la main, frites à l'huile d'olive et nappées de miel pur du Moyen Atlas.</p>
+      <div class="menu-price">À partir de 80 MAD / 250g</div>
+    </div>
+    <div class="menu-card reveal reveal-delay-1">
+      <span class="menu-badge">Signature</span>
+      <span class="menu-icon">🌙</span>
+      <div class="menu-name">Cornes de Gazelle</div>
+      <div class="menu-arabic">كعب الغزال</div>
+      <p class="menu-desc">Croissants de pâte fine fourrés de pâte d'amandes de Tafraout, aromatisés à la fleur d'oranger.</p>
+      <div class="menu-price">À partir de 120 MAD / 250g</div>
+    </div>
+    <div class="menu-card reveal reveal-delay-2">
+      <span class="menu-icon">🔺</span>
+      <div class="menu-name">Briouates sucrées</div>
+      <div class="menu-arabic">البريوات</div>
+      <p class="menu-desc">Triangles de feuilles de brick croustillantes, cœur amande-cannelle, trempés dans le miel chaud.</p>
+      <div class="menu-price">À partir de 90 MAD / 250g</div>
+    </div>
+    <div class="menu-card reveal">
+      <span class="menu-icon">⭐</span>
+      <div class="menu-name">Ghriba au Coco</div>
+      <div class="menu-arabic">الغريبة</div>
+      <p class="menu-desc">Biscuits fondants à la noix de coco et eau de fleur d'oranger, à la texture unique qui s'effrite délicieusement.</p>
+      <div class="menu-price">À partir de 70 MAD / 250g</div>
+    </div>
+    <div class="menu-card reveal reveal-delay-1">
+      <span class="menu-badge">Prestige</span>
+      <span class="menu-icon">🐍</span>
+      <div class="menu-name">Mhancha Royale</div>
+      <div class="menu-arabic">المحنشة</div>
+      <p class="menu-desc">Grand serpentin de pâte feuilletée garni d'amandes et de cannelle, décoré à l'or comestible. Sur commande.</p>
+      <div class="menu-price">À partir de 350 MAD / pièce</div>
+    </div>
+    <div class="menu-card reveal reveal-delay-2">
+      <span class="menu-icon">🍯</span>
+      <div class="menu-name">Sellou</div>
+      <div class="menu-arabic">السلو</div>
+      <p class="menu-desc">Mélange ancestral de farine grillée, amandes, sésame, miel et épices aromatiques. Énergie et tradition.</p>
+      <div class="menu-price">À partir de 100 MAD / 300g</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact-section">
+  <div style="text-align: center; margin-bottom: 5rem;">
+    <span class="section-label reveal" style="display: block; text-align: center;">✦ Nous rendre visite</span>
+    <h2 class="section-title reveal reveal-delay-1" style="text-align: center;">Venez <em>nous rencontrer</em></h2>
+    <div class="gold-rule reveal reveal-delay-2" style="margin: 0 auto;"></div>
+  </div>
+  <div class="contact-grid">
+    <div>
+      <div class="contact-info-item reveal">
+        <div class="contact-icon">📍</div>
+        <div class="contact-detail">
+          <span class="contact-label">Adresse</span>
+          <span class="contact-value">12, Derb Sidi Bouloukate<br>Médina, Marrakech 40000</span>
+        </div>
+      </div>
+      <div class="contact-info-item reveal reveal-delay-1">
+        <div class="contact-icon">🕐</div>
+        <div class="contact-detail">
+          <span class="contact-label">Horaires</span>
+          <span class="contact-value">Lun – Sam : 9h00 – 20h00<br>Dimanche : 10h00 – 18h00</span>
+        </div>
+      </div>
+      <div class="contact-info-item reveal reveal-delay-2">
+        <div class="contact-icon">📞</div>
+        <div class="contact-detail">
+          <span class="contact-label">Téléphone</span>
+          <span class="contact-value">+212 524 38 XX XX</span>
+        </div>
+      </div>
+      <div class="contact-info-item reveal reveal-delay-3">
+        <div class="contact-icon">✉</div>
+        <div class="contact-detail">
+          <span class="contact-label">Email</span>
+          <span class="contact-value">contact@daralhalwa.ma</span>
+        </div>
+      </div>
+    </div>
+    <div class="map-placeholder reveal reveal-delay-1">
+      <div class="map-pin">📍</div>
+      <p class="map-address">Médina de Marrakech<br>Derb Sidi Bouloukate</p>
+      <span class="map-marrakech">✦ Marrakech · Maroc ✦</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-ornament">✦</span>
+  <span class="footer-logo">DAR AL HALWA</span>
+  <p class="footer-tagline">Pâtisserie Marocaine d'Exception · Marrakech</p>
+  <div class="footer-links">
+    <a href="#">Instagram</a>
+    <a href="#">Facebook</a>
+    <a href="#">WhatsApp</a>
+    <a href="#">Commande</a>
+  </div>
+  <p class="footer-copy">© 2024 Dar Al Halwa · Marrakech · Tous droits réservés</p>
+</footer>
+
+<script>
+  // Loader
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('loader').classList.add('hide');
+    }, 1800);
+  });
+
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const dot = document.getElementById('cursor-dot');
+  let cx = 0, cy = 0, dx = 0, dy = 0;
+  document.addEventListener('mousemove', e => {
+    dx = e.clientX; dy = e.clientY;
+    dot.style.left = dx + 'px'; dot.style.top = dy + 'px';
+  });
+  function animateCursor() {
+    cx += (dx - cx) * 0.12;
+    cy += (dy - cy) * 0.12;
+    cursor.style.left = cx + 'px';
+    cursor.style.top = cy + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+  document.querySelectorAll('a, button, .menu-card, .gallery-item').forEach(el => {
+    el.addEventListener('mouseenter', () => { cursor.style.width = '32px'; cursor.style.height = '32px'; cursor.style.background = 'rgba(201,148,42,.15)'; });
+    el.addEventListener('mouseleave', () => { cursor.style.width = '14px'; cursor.style.height = '14px'; cursor.style.background = 'transparent'; });
+  });
+
+  // Navbar scroll
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // Particles
+  const pContainer = document.getElementById('particles');
+  for (let i = 0; i < 28; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.cssText = `
+      left: ${Math.random() * 100}%;
+      --dur: ${6 + Math.random() * 10}s;
+      --delay: ${Math.random() * 10}s;
+      --drift: ${(Math.random() - .5) * 120}px;
+      width: ${1 + Math.random() * 2}px;
+      height: ${1 + Math.random() * 2}px;
+      opacity: 0;
+    `;
+    pContainer.appendChild(p);
+  }
+
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
